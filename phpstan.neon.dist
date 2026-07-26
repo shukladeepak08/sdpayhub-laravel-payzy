@@ -5,6 +5,8 @@ parameters:
     excludePaths:
         - vendor
     treatPhpDocTypesAsCertain: false
+    # Dev deps (PHPStan/Larastan) resolve differently across the Laravel matrix.
+    reportUnmatchedIgnoredErrors: false
 
 includes:
     - phpstan-baseline.neon

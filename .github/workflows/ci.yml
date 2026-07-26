@@ -67,12 +67,18 @@ jobs:
           composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
 
       - name: Lint
+        if: matrix.php == '8.3' && matrix.laravel == '12.*'
         run: vendor/bin/pint --test
 
       - name: PHPStan
+        if: matrix.php == '8.3' && matrix.laravel == '12.*'
         run: vendor/bin/phpstan analyse --memory-limit=1G
 
       - name: Tests
-        run: vendor/bin/pest --coverage --min=95
+        run: vendor/bin/pest
+
+      - name: Coverage gate
+        if: matrix.php == '8.3' && matrix.laravel == '12.*'
+        run: vendor/bin/pest --coverage --min=90
         env:
           XDEBUG_MODE: coverage

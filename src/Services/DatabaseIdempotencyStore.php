@@ -18,18 +18,30 @@ final class DatabaseIdempotencyStore implements IdempotencyStore
             return null;
         }
 
-        if (isset($row->expires_at) && now()->greaterThan($row->expires_at)) {
+        $expiresAt = $row->expires_at ?? null;
+
+        if (
+            (is_string($expiresAt) || $expiresAt instanceof \DateTimeInterface)
+            && now()->greaterThan($expiresAt)
+        ) {
             $this->forget($key);
 
             return null;
         }
 
-        $payload = json_decode((string) $row->response, true);
+        $cached = $row->response ?? null;
+
+        if (! is_string($cached) && ! is_numeric($cached)) {
+            return null;
+        }
+
+        $payload = json_decode((string) $cached, true);
 
         if (! is_array($payload)) {
             return null;
         }
 
+        /** @var array<string, mixed> $payload */
         return $this->hydrate($payload);
     }
 
