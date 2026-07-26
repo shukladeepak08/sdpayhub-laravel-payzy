@@ -9,7 +9,7 @@ use Sdpayhub\Payzy\DTOs\PaymentResponse;
 use Sdpayhub\Payzy\Services\PayzyManager;
 
 /**
- * Fluent pending payment builder used by the Payment facade/manager.
+ * Fluent pending payment builder used by the Payzy facade/manager.
  */
 final class PendingPayment
 {

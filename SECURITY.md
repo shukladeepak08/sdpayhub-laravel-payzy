@@ -5,42 +5,71 @@
 | Version | Supported |
 |---|---|
 | 1.x | Yes |
-| Pre-1.0 | No |
+| &lt; 1.0 | No |
 
 ## Reporting a vulnerability
 
-If you discover a security issue in Payzy, please report it privately.
+If you find a security issue in Payzy, **report it privately**.
 
-**Do not** open a public GitHub issue for vulnerabilities that could expose merchant credentials, forge webhooks, bypass idempotency, or cause duplicate charges.
+**Do not** open a public GitHub issue for anything that could:
 
-Email: **shukladeepak08@gmail.com**
+- Leak merchant API keys or webhook secrets
+- Forge or replay webhooks
+- Bypass idempotency and create duplicate charges
+- Skip signature verification
 
-Include:
+**Email:** dshukla0806@gmail.com
 
-- Package version (`composer show sdpayhub/laravel-payzy`)
-- Laravel and PHP versions
-- A clear description of the issue and impact
-- Steps to reproduce or a minimal proof of concept
-- Any suggested fix, if you have one
+Please include:
 
-You should receive an acknowledgement within **72 hours**. We will coordinate a fix and disclosure timeline with you.
+1. Package version (`composer show sdpayhub/laravel-payzy`)
+2. PHP and Laravel versions
+3. What is wrong and what an attacker could do
+4. Steps to reproduce (or a small proof of concept)
+5. A suggested fix, if you have one
+
+You should get an acknowledgement within **72 hours**. We will work with you on a fix and disclosure timeline.
+
+## Security standards in this package
+
+Payzy is built with these rules:
+
+| Control | How Payzy handles it |
+|---|---|
+| Secrets | Read from environment / config only — never hard-coded |
+| Logging | API keys, tokens, and card-like fields are masked |
+| HTTP | Laravel HTTP client with TLS verification always on |
+| Webhooks | Real per-gateway signature verification |
+| Replay attacks | Timestamp window + event-id / nonce dedupe |
+| Idempotency | Fingerprinted keys; conflicting payloads are rejected |
+| Errors | Typed exceptions under `PayzyException` (no silent swallow of failures) |
+| Dependencies | Dependabot alerts enabled via `.github/dependabot.yml` |
+
+## Maintainer checklist before a release
+
+- [ ] No secrets in the repository (`.env`, keys, tokens)
+- [ ] CI green (lint, PHPStan, tests)
+- [ ] Webhook verification paths covered by tests
+- [ ] Idempotency conflict behaviour covered by tests
+- [ ] `SECURITY.md` and contact email still valid
 
 ## Scope
 
-In scope:
+**In scope**
 
-- Webhook signature verification bypass
+- Webhook signature bypass
 - Replay / nonce guard weaknesses
-- Secret leakage via logs or responses
-- Idempotency store races that can double-charge
-- Unsafe HTTP client behaviour (timeouts, redirects) that affects payment integrity
+- Secret leakage through logs or responses
+- Idempotency races that can double-charge
+- Unsafe HTTP client behaviour that hurts payment integrity
 
-Out of scope:
+**Out of scope**
 
-- Compromised merchant API keys or misconfigured provider dashboards
-- Issues in upstream payment provider APIs
-- Denial of service against your own application infrastructure
+- Stolen or leaked merchant keys outside this package
+- Bugs in Razorpay / Stripe / PayPal / Paytm / PhonePe APIs
+- Application-level auth / authorization in your own app
+- Denial of service against your own infrastructure
 
 ## Safe harbour
 
-Security researchers acting in good faith (no data destruction, no privacy violations beyond what is needed to demonstrate the issue) will not face legal action from the maintainer for reports submitted through this process.
+Good-faith security research (no data destruction, no privacy harm beyond what is needed to show the issue) will not face legal action from the maintainer for reports sent through this process.
