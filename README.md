@@ -1,2 +1,2 @@
 # sdpayhub-laravel-payzy
-Unified, reliable payment gateway integration for Laravel — one consistent API for Razorpay, Stripe, PayPal, Paytm, and PhonePe with real webhook security and idempotency built in.
+A Laravel package for multi-gateway payments that actually behaves like one API — consistent responses, verified webhooks, and built-in idempotency across Razorpay, Stripe, PayPal, Paytm, and PhonePe.
