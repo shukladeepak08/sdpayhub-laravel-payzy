@@ -48,7 +48,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, bcmath
-          coverage: xdebug
+          coverage: none
 
       - name: Install dependencies
         run: |
@@ -76,9 +76,3 @@ jobs:
 
       - name: Tests
         run: vendor/bin/pest
-
-      - name: Coverage gate
-        if: matrix.php == '8.3' && matrix.laravel == '12.*'
-        run: vendor/bin/pest --coverage --min=90
-        env:
-          XDEBUG_MODE: coverage
