@@ -14,7 +14,6 @@ use Sdpayhub\Payzy\Events\PaymentSuccess;
 use Sdpayhub\Payzy\Events\RefundCompleted;
 use Sdpayhub\Payzy\Events\RefundCreated;
 use Sdpayhub\Payzy\Exceptions\ConfigurationException;
-use Sdpayhub\Payzy\Exceptions\IdempotencyConflictException;
 use Sdpayhub\Payzy\Exceptions\PaymentFailedException;
 use Sdpayhub\Payzy\Exceptions\PayzyException;
 use Sdpayhub\Payzy\Factories\GatewayFactory;

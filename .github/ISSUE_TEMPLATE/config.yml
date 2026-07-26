@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/shukladeepak08/sdpayhub-laravel-payzy/security/advisories/new
+    about: Please report security issues privately — do not open a public issue.
+  - name: Packagist package
+    url: https://packagist.org/packages/sdpayhub/laravel-payzy
+    about: Install stats and released versions.

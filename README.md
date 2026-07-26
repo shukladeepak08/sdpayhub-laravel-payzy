@@ -1,10 +1,16 @@
 # Payzy
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/sdpayhub/laravel-payzy.svg?style=flat-square)](https://packagist.org/packages/sdpayhub/laravel-payzy)
+[![Total Downloads](https://img.shields.io/packagist/dt/sdpayhub/laravel-payzy.svg?style=flat-square)](https://packagist.org/packages/sdpayhub/laravel-payzy)
 [![CI](https://github.com/shukladeepak08/sdpayhub-laravel-payzy/actions/workflows/ci.yml/badge.svg)](https://github.com/shukladeepak08/sdpayhub-laravel-payzy/actions/workflows/ci.yml)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%20max-brightgreen.svg?style=flat-square)](phpstan.neon.dist)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
 One simple API for Laravel payments. Use **Razorpay**, **Stripe**, **PayPal**, **Paytm**, or **PhonePe** without learning five different SDKs.
+
+```bash
+composer require sdpayhub/laravel-payzy
+```
 
 ```php
 use Sdpayhub\Payzy\Facades\Payzy;
@@ -290,6 +296,20 @@ composer test
 composer analyse
 composer lint
 ```
+
+## Packagist auto-update (maintainers)
+
+If Packagist shows **“This package is not auto-updated”**, GitHub is not notifying Packagist on push. Fix it once:
+
+1. Open [Packagist → your profile → Show API Token](https://packagist.org/profile/).
+2. On GitHub: **Settings → Webhooks → Add webhook**
+   - Payload URL: `https://packagist.org/api/github?username=YOUR_PACKAGIST_USERNAME`
+   - Content type: `application/json`
+   - Secret: your Packagist API token
+   - Events: **Just the push event**
+3. Back on the [package page](https://packagist.org/packages/sdpayhub/laravel-payzy), click **Update** so tags and the README sync immediately.
+
+After that, every push and tag appears on Packagist automatically (including the README below the install command).
 
 ## Need more detail?
 
