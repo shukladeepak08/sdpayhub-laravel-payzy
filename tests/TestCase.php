@@ -30,13 +30,13 @@ abstract class TestCase extends Orchestra
         $app['config']->set('payzy.gateways.razorpay', [
             'key' => 'rzp_test_key',
             'secret' => 'rzp_test_secret',
-            'webhook_secret' => 'whsec_test',
+            'webhook_secret' => 'test_razorpay_webhook_secret',
             'base_url' => 'https://api.razorpay.com/v1',
         ]);
 
         $app['config']->set('payzy.gateways.stripe', [
             'secret' => 'sk_test_secret',
-            'webhook_secret' => 'whsec_stripe_test',
+            'webhook_secret' => 'test_stripe_webhook_secret',
             'base_url' => 'https://api.stripe.com/v1',
             'api_version' => '2024-06-20',
         ]);

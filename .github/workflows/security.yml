@@ -35,12 +35,13 @@ jobs:
 
       - name: Fail if hard-coded high-risk secret patterns appear in src/
         run: |
+          # Require realistic token length so short test placeholders do not fail CI.
           if grep -RInE \
             --exclude-dir=vendor \
             --exclude-dir=.git \
-            -e 'sk_live_[A-Za-z0-9]+' \
-            -e 'rk_live_[A-Za-z0-9]+' \
-            -e 'whsec_[A-Za-z0-9]+' \
+            -e 'sk_live_[A-Za-z0-9]{16,}' \
+            -e 'rk_live_[A-Za-z0-9]{16,}' \
+            -e 'whsec_[A-Za-z0-9]{16,}' \
             -e '-----BEGIN (RSA |OPENSSH )?PRIVATE KEY-----' \
             src config tests 2>/dev/null; then
             echo "Possible hard-coded secret found in source/config/tests."

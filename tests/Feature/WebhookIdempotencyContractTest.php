@@ -49,7 +49,7 @@ it('accepts verified razorpay webhooks through the HTTP endpoint and queues proc
     ];
 
     $raw = json_encode($body, JSON_THROW_ON_ERROR);
-    $signature = Signature::hmacSha256($raw, 'whsec_test');
+    $signature = Signature::hmacSha256($raw, 'test_razorpay_webhook_secret');
 
     $response = $this->call(
         'POST',

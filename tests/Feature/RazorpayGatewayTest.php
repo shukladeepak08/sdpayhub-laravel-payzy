@@ -116,7 +116,7 @@ it('verifies razorpay webhooks and rejects bad signatures', function (): void {
         'payload' => ['payment' => ['entity' => ['id' => 'pay_1']]],
     ], JSON_THROW_ON_ERROR);
 
-    $signature = Signature::hmacSha256($body, 'whsec_test');
+    $signature = Signature::hmacSha256($body, 'test_razorpay_webhook_secret');
 
     $ok = Payzy::using('razorpay')->verifyWebhook([
         'raw_body' => $body,

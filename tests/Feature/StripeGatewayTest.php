@@ -83,7 +83,7 @@ it('verifies stripe webhooks with timestamp and rejects invalid signatures', fun
 
     $timestamp = time();
     $signed = $timestamp.'.'.$payload;
-    $secret = 'whsec_stripe_test';
+    $secret = 'test_stripe_webhook_secret';
     $sig = hash_hmac('sha256', $signed, $secret);
     $header = 't='.$timestamp.',v1='.$sig;
 
