@@ -1,0 +1,49 @@
+# Keep the default branch and pull requests free of obvious secret leaks.
+# Requires GitHub Advanced Security / secret scanning where available;
+# this file still documents the policy for contributors.
+
+name: Security
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  secret-hygiene:
+    name: Secret hygiene checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail if .env files are committed
+        run: |
+          if git ls-files | grep -E '(^|/)\.env($|\.)'; then
+            echo "Committed .env files are not allowed."
+            exit 1
+          fi
+
+      - name: Fail if common secret filenames are tracked
+        run: |
+          if git ls-files | grep -Ei '(credentials\.json|service-account.*\.json|id_rsa|\.pem$)'; then
+            echo "Sensitive credential files must not be committed."
+            exit 1
+          fi
+
+      - name: Fail if hard-coded high-risk secret patterns appear in src/
+        run: |
+          if grep -RInE \
+            --exclude-dir=vendor \
+            --exclude-dir=.git \
+            -e 'sk_live_[A-Za-z0-9]+' \
+            -e 'rk_live_[A-Za-z0-9]+' \
+            -e 'whsec_[A-Za-z0-9]+' \
+            -e '-----BEGIN (RSA |OPENSSH )?PRIVATE KEY-----' \
+            src config tests 2>/dev/null; then
+            echo "Possible hard-coded secret found in source/config/tests."
+            exit 1
+          fi
+          echo "No obvious hard-coded secret patterns found."
