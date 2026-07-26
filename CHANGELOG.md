@@ -31,11 +31,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nothing yet.
 
+## [1.0.1] - 2026-07-26
+
+### Fixed
+
+- Idempotency no longer runs on read-only operations like `status()` / `verify()` (this broke fresh Laravel apps using `CACHE_STORE=database` without a database file)
+- Clear `ConfigurationException` when the idempotency cache store is unavailable
+- Default `PAYZY_IDEMPOTENCY_AUTO` is now `false` — pass an explicit `idempotencyKey()` for checkout protection (as documented)
+
+### Changed
+
+- README documents the `CACHE_STORE=file` recommendation for new apps
+
 ## [1.0.0] - 2026-07-26
 
 ### Added
 
-- Unified `Payment` facade and `PayzyManager` API for Razorpay, Stripe, PayPal, Paytm, and PhonePe
+- Unified `Payzy` facade and `PayzyManager` API for Razorpay, Stripe, PayPal, Paytm, and PhonePe
 - Fluent pending payment builder: `Payzy::gateway()->amount()->currency()->orderId()->create()`
 - Core operations: `charge` / `create`, `capture`, `refund`, `partialRefund`, `status`, `cancel`, `verify`, `verifySignature`, `verifyWebhook`, `paymentLink`, `qr`
 - Customer APIs on Razorpay and Stripe (`SupportsCustomers`)

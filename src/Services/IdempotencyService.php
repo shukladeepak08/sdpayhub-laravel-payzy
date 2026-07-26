@@ -7,7 +7,9 @@ namespace Sdpayhub\Payzy\Services;
 use Illuminate\Support\Str;
 use Sdpayhub\Payzy\Contracts\IdempotencyStore;
 use Sdpayhub\Payzy\DTOs\PaymentResponse;
+use Sdpayhub\Payzy\Exceptions\ConfigurationException;
 use Sdpayhub\Payzy\Exceptions\IdempotencyConflictException;
+use Throwable;
 
 /**
  * Handles idempotency key generation, fingerprinting, and replay-safe caching.
@@ -37,7 +39,7 @@ final class IdempotencyService
             return $provided;
         }
 
-        if (! (bool) ($this->config['auto_generate'] ?? true)) {
+        if (! (bool) ($this->config['auto_generate'] ?? false)) {
             return null;
         }
 
@@ -69,30 +71,51 @@ final class IdempotencyService
 
         $fingerprint = $this->fingerprint($operation, $payload);
 
-        if ($this->store->has($key)) {
-            $existingFingerprint = $this->store->getFingerprint($key);
+        try {
+            if ($this->store->has($key)) {
+                $existingFingerprint = $this->store->getFingerprint($key);
 
-            if ($existingFingerprint !== null && ! hash_equals($existingFingerprint, $fingerprint)) {
-                throw new IdempotencyConflictException(
-                    message: 'Idempotency key reused with a different request payload.',
-                    context: ['key' => $key, 'operation' => $operation],
-                );
+                if ($existingFingerprint !== null && ! hash_equals($existingFingerprint, $fingerprint)) {
+                    throw new IdempotencyConflictException(
+                        message: 'Idempotency key reused with a different request payload.',
+                        context: ['key' => $key, 'operation' => $operation],
+                    );
+                }
+
+                $cached = $this->store->get($key);
+
+                if ($cached !== null) {
+                    return $cached;
+                }
             }
-
-            $cached = $this->store->get($key);
-
-            if ($cached !== null) {
-                return $cached;
-            }
+        } catch (IdempotencyConflictException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            throw $this->storeUnavailable($exception, $operation);
         }
 
         /** @var PaymentResponse $response */
         $response = $callback();
 
         $ttl = (int) ($this->config['ttl_seconds'] ?? 86400);
-        $this->store->put($key, $response, $fingerprint, $ttl);
+
+        try {
+            $this->store->put($key, $response, $fingerprint, $ttl);
+        } catch (Throwable $exception) {
+            throw $this->storeUnavailable($exception, $operation);
+        }
 
         return $response;
+    }
+
+    private function storeUnavailable(Throwable $exception, string $operation): ConfigurationException
+    {
+        return new ConfigurationException(
+            message: 'Payzy idempotency store is unavailable. Set CACHE_STORE=file (or array) in .env, '
+                .'or run migrations if you use the database cache driver. Original error: '.$exception->getMessage(),
+            previous: $exception,
+            context: ['operation' => $operation],
+        );
     }
 
     /**

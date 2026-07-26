@@ -171,7 +171,7 @@ return [
         'ttl_seconds' => (int) env('PAYZY_IDEMPOTENCY_TTL', 86400),
         'cache_store' => env('PAYZY_IDEMPOTENCY_CACHE_STORE'),
         'header' => env('PAYZY_IDEMPOTENCY_HEADER', 'Idempotency-Key'),
-        'auto_generate' => (bool) env('PAYZY_IDEMPOTENCY_AUTO', true),
+        'auto_generate' => (bool) env('PAYZY_IDEMPOTENCY_AUTO', false),
     ],
 
 ];

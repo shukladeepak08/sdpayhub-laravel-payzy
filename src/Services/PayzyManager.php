@@ -14,6 +14,7 @@ use Sdpayhub\Payzy\Events\PaymentSuccess;
 use Sdpayhub\Payzy\Events\RefundCompleted;
 use Sdpayhub\Payzy\Events\RefundCreated;
 use Sdpayhub\Payzy\Exceptions\ConfigurationException;
+use Sdpayhub\Payzy\Exceptions\IdempotencyConflictException;
 use Sdpayhub\Payzy\Exceptions\PaymentFailedException;
 use Sdpayhub\Payzy\Exceptions\PayzyException;
 use Sdpayhub\Payzy\Factories\GatewayFactory;
@@ -287,26 +288,38 @@ final class PayzyManager
             $payload['currency'] = (string) config('payzy.currency', $this->config['currency'] ?? 'INR');
         }
 
-        $idempotencyKey = $this->idempotency->resolveKey(
-            isset($payload['idempotency_key']) && is_string($payload['idempotency_key'])
-                ? $payload['idempotency_key']
-                : null
-        );
+        $providedIdempotencyKey = isset($payload['idempotency_key']) && is_string($payload['idempotency_key'])
+            ? $payload['idempotency_key']
+            : null;
 
-        if ($idempotencyKey !== null) {
+        // Idempotency applies only to mutating payment operations — never to status/verify reads.
+        $idempotencyKey = $this->usesIdempotency($operation)
+            ? $this->idempotency->resolveKey($providedIdempotencyKey)
+            : (($providedIdempotencyKey !== null && $providedIdempotencyKey !== '') ? $providedIdempotencyKey : null);
+
+        if ($idempotencyKey !== null && $this->usesIdempotency($operation)) {
             $payload['idempotency_key'] = $idempotencyKey;
         }
 
         try {
-            if ($idempotencyKey !== null) {
-                $response = $this->idempotency->rememberOrExecute(
-                    $idempotencyKey,
-                    $gatewayName.':'.$operation,
-                    $payload,
-                    static function () use ($callback, $gateway, $payload): PaymentResponse {
-                        return $callback($gateway, $payload);
-                    },
-                );
+            if ($idempotencyKey !== null && $this->usesIdempotency($operation)) {
+                try {
+                    $response = $this->idempotency->rememberOrExecute(
+                        $idempotencyKey,
+                        $gatewayName.':'.$operation,
+                        $payload,
+                        static function () use ($callback, $gateway, $payload): PaymentResponse {
+                            return $callback($gateway, $payload);
+                        },
+                    );
+                } catch (ConfigurationException $exception) {
+                    // Explicit keys must not silently skip protection; auto keys may fall through.
+                    if ($providedIdempotencyKey !== null && $providedIdempotencyKey !== '') {
+                        throw $exception;
+                    }
+
+                    $response = $callback($gateway, $payload);
+                }
             } else {
                 $response = $callback($gateway, $payload);
             }
@@ -335,6 +348,28 @@ final class PayzyManager
         }
 
         return $response;
+    }
+
+    /**
+     * Operations that may safely use idempotency keys.
+     */
+    private function usesIdempotency(string $operation): bool
+    {
+        return in_array($operation, [
+            'create',
+            'capture',
+            'refund',
+            'partial_refund',
+            'payment_link',
+            'qr',
+            'create_customer',
+            'update_customer',
+            'delete_customer',
+            'create_subscription',
+            'cancel_subscription',
+            'pause_subscription',
+            'resume_subscription',
+        ], true);
     }
 
     /**

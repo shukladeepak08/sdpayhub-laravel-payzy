@@ -171,7 +171,7 @@ Payzy will:
 
 ## Avoid duplicate charges
 
-Always send an idempotency key for checkout / create calls:
+Always send an idempotency key for checkout / create / refund calls:
 
 ```php
 Payzy::gateway('razorpay')
@@ -183,6 +183,16 @@ Payzy::gateway('razorpay')
 ```
 
 If the same key is reused with a **different** payload, Payzy throws `IdempotencyConflictException`.
+
+### Cache note
+
+Payzy stores idempotency results in Laravel’s cache. On a fresh Laravel app, prefer:
+
+```env
+CACHE_STORE=file
+```
+
+If you use `CACHE_STORE=database`, run migrations first so the `cache` table exists. Otherwise create/refund with an explicit idempotency key will fail with a clear configuration error.
 
 ## Listen for events
 
